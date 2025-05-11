@@ -21,6 +21,9 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
+
+	implementation("org.projectlombok:lombok:1.18.30")
+	annotationProcessor("org.projectlombok:lombok:1.18.30")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -32,5 +35,25 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.App"
+    mainClass = "com.ljlox.Lox"
 }
+
+
+val fatJar = tasks.register<Jar>("fatJar") {
+    archiveBaseName.set("lox")
+    archiveClassifier.set("all")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes["Main-Class"] = application.mainClass.get()
+    }
+
+    from({
+        configurations.runtimeClasspath.get().map {
+            if (it.isDirectory) it else zipTree(it)
+        }
+    })
+
+    with(tasks.jar.get())
+}
+
